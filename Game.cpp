@@ -31,3 +31,20 @@ void setupGame(WINDOW*& win, int& height, int& width,
 
     food = {rand() % (width - 2) + 1, rand() % (height - 2) + 1};
 }
+// -----------------------------------------------------------------------
+
+void draw(WINDOW* win, const std::vector<Point>& snake, const Point& food) {
+    werase(win);
+    box(win, 0, 0);
+
+    // Draw food
+    mvwprintw(win, food.y, food.x, "O");
+
+    // Draw snake
+    for (size_t i = 0; i < snake.size(); i++) {
+        mvwprintw(win, snake[i].y, snake[i].x, i == 0 ? "@" : "*");
+    }
+
+    wrefresh(win);
+}
+
