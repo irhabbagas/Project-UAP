@@ -47,4 +47,56 @@ void draw(WINDOW* win, const std::vector<Point>& snake, const Point& food) {
 
     wrefresh(win);
 }
+// -----------------------------------------------------------------------
+isi put
+// -----------------------------------------------------------------------
+
+int main() {
+    WINDOW* win;
+    int width, height;
+    std::vector<Point> snake;
+    Point food;
+    int dx, dy;
+
+    setupGame(win, height, width, snake, food, dx, dy);
+
+    int ch;
+    bool running = true;
+
+    while (running) {
+        ch = getch();
+        switch (ch) {
+            case KEY_UP:    if (dy != 1)  { dx = 0; dy = -1; } break;
+            case KEY_DOWN:  if (dy != -1) { dx = 0; dy = 1; }  break;
+            case KEY_LEFT:  if (dx != 1)  { dx = -1; dy = 0; } break;
+            case KEY_RIGHT: if (dx != -1) { dx = 1;  dy = 0; } break;
+        }
+
+        moveSnake(snake, dx, dy);
+
+        // Makan makanan
+        if (snake[0].x == food.x && snake[0].y == food.y) {
+            snake.push_back(snake.back()); // perpanjang ular
+            food = {rand() % (width - 2) + 1, rand() % (height - 2) + 1};
+        }
+
+        // Cek tabrakan
+        if (checkCollision(snake, width, height)) {
+            running = false;
+        }
+
+        draw(win, snake, food);
+        napms(100); // delay 100ms
+    }
+
+    // Game Over
+    mvwprintw(win, height/2, (width/2)-5, "GAME OVER");
+    wrefresh(win);
+    nodelay(stdscr, FALSE);
+    getch();
+
+    endwin();
+    return 0;
+}
+
 
