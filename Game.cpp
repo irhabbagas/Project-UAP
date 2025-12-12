@@ -48,7 +48,31 @@ void draw(WINDOW* win, const std::vector<Point>& snake, const Point& food) {
     wrefresh(win);
 }
 // -----------------------------------------------------------------------
-isi put
+bool checkCollision(const std::vector<Point>& snake, int width, int height) {
+    int x = snake[0].x;
+    int y = snake[0].y;
+
+    // Menabrak dinding
+    if (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1)
+        return true;
+
+    // Menabrak badan sendiri
+    for (size_t i = 1; i < snake.size(); i++)
+        if (snake[i].x == x && snake[i].y == y)
+            return true;
+
+    return false;
+}
+
+// -----------------------------------------------------------------------
+
+void moveSnake(std::vector<Point>& snake, int dx, int dy) {
+    Point newHead = {snake[0].x + dx, snake[0].y + dy};
+
+    // Geser badan ular
+    snake.insert(snake.begin(), newHead);
+    snake.pop_back();
+}
 // -----------------------------------------------------------------------
 
 int main() {
