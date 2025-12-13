@@ -7,9 +7,24 @@ struct Point {
     int x, y;
 };
 
+void spawnFood(Point &food, int widht, int height, const std::vector<Point>& snake){
+    bool valid;
+do {
+    valid =true;
+    food.x = rand() % (widht - 2) + 1;
+    food.y = rand() % (height - 2) + 1;
+
+    for(auto &s : snake){
+        if(s.x == food.x && s.y == food.y){
+        valid = false;
+        break;
+        }
+    } 
+}while (!valid);
+}
 void setupGame(WINDOW*& win, int& height, int& width, 
-               std::vector<Point>& snake, Point& food, 
-               int& dx, int& dy) 
+            std::vector<Point>& snake, Point& food, 
+            int& dx, int& dy) 
 {
     initscr();
     curs_set(0);
@@ -23,13 +38,15 @@ void setupGame(WINDOW*& win, int& height, int& width,
 
     win = newwin(height, width, 1, 1);
     box(win, 0, 0);
-    wrefresh(win);
 
-    snake = {{width/2, height/2}};
+    snake.clear();
+    snake.push_back({width/2, height/2});
+
     dx = 1;
     dy = 0;
 
-    food = {rand() % (width - 2) + 1, rand() % (height - 2) + 1};
+    spawnFood(food, width, height, snake);
+
 }
 // -----------------------------------------------------------------------
 
@@ -65,13 +82,15 @@ bool checkCollision(const std::vector<Point>& snake, int width, int height) {
 }
 
 // -----------------------------------------------------------------------
-
-void moveSnake(std::vector<Point>& snake, int dx, int dy) {
+//jalan ular
+void moveSnake(std::vector<Point>& snake, int dx, int dy, bool grow) {
     Point newHead = {snake[0].x + dx, snake[0].y + dy};
 
     // Geser badan ular
     snake.insert(snake.begin(), newHead);
-    snake.pop_back();
+
+        if (!grow)
+            snake.pop_back();
 }
 // -----------------------------------------------------------------------
 
@@ -84,11 +103,10 @@ int main() {
 
     setupGame(win, height, width, snake, food, dx, dy);
 
-    int ch;
     bool running = true;
 
     while (running) {
-        ch = getch();
+        int ch = getch();
         switch (ch) {
             case KEY_UP:    if (dy != 1)  { dx = 0; dy = -1; } break;
             case KEY_DOWN:  if (dy != -1) { dx = 0; dy = 1; }  break;
@@ -96,25 +114,23 @@ int main() {
             case KEY_RIGHT: if (dx != -1) { dx = 1;  dy = 0; } break;
         }
 
-        moveSnake(snake, dx, dy);
+        bool grow = false;
 
-        // Makan makanan
-        if (snake[0].x == food.x && snake[0].y == food.y) {
-            snake.push_back(snake.back()); // perpanjang ular
-            food = {rand() % (width - 2) + 1, rand() % (height - 2) + 1};
+        if (snake[0].x == food.x && snake[0].y == food.y){
+            grow = true;
+            spawnFood(food, width, height, snake);
         }
 
-        // Cek tabrakan
-        if (checkCollision(snake, width, height)) {
+        moveSnake(snake, dx, dy, grow);
+
+        if (checkCollision(snake, width, height))
             running = false;
-        }
 
         draw(win, snake, food);
-        napms(100); // delay 100ms
+        napms(120);
     }
 
-    // Game Over
-    mvwprintw(win, height/2, (width/2)-5, "GAME OVER");
+    mvwprintw(win, height/2, width / 2 - 5, "GAME OVER");
     wrefresh(win);
     nodelay(stdscr, FALSE);
     getch();
